@@ -9,6 +9,16 @@ const getAllUsers = async (req, res) => {
   res.json(allUsers.rows);
 };
 
+const getOneUser = async (req, res) => {
+  const { id } = req.params;
+  const oneUser = await db.query(
+    "SELECT users.id, users.username, users.email FROM users WHERE id=$1",
+    [id]
+  );
+
+  res.json(oneUser.rows[0]);
+};
+
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
   const user = await db.query(
@@ -36,6 +46,7 @@ const loginUser = async (req, res) => {
 
 const registerUser = async (req, res) => {
   const { email, username, password } = req.body;
+  console.log(password)
 
   const foundUser = await db.query(
     "SELECT email FROM users WHERE email = $1 OR username = $2",
@@ -69,6 +80,7 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
   getAllUsers,
+  getOneUser,
   loginUser,
   registerUser,
   deleteUser,
