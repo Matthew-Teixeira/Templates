@@ -7,10 +7,11 @@ const Register = () => {
     username: "",
     email: "",
     password: "",
-    //confirmPassword: "",
+    confirmPassword: "",
   });
+  const [errors, setErrors] = useState("");
 
-  const registerUser = async (username, email, password) => {
+  const registerUser = async (username, email, password, confirmPassword) => {
     fetch("http://localhost:5000/api/user/register", {
       mode: "cors",
       method: "POST",
@@ -18,7 +19,7 @@ const Register = () => {
         username,
         email,
         password,
-        //confirmPassword,
+        confirmPassword,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -27,8 +28,11 @@ const Register = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Success:", data);
-        Auth.login(data.token);
+        if (data.error) {
+          setErrors(data.error);
+        } else {
+          Auth.login(data.token);
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -42,7 +46,7 @@ const Register = () => {
 
   const onSubmit = (event) => {
     event.preventDefault();
-    registerUser(formData.username, formData.email, formData.password);
+    registerUser(formData.username, formData.email, formData.password, formData.confirmPassword);
   };
 
   return (
@@ -150,6 +154,13 @@ const Register = () => {
           </form>
         </div>
       </div>
+      {
+        errors !== "" ? (
+          <p className="text-center">{errors}</p>
+        ) : (
+          false
+        )
+      }
     </>
   );
 };

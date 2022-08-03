@@ -1,6 +1,10 @@
 const db = require("../connection/db");
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../utils/generateJWT");
+const {
+  validateRegisterInput,
+  validateLoginInput,
+} = require("../utils/validators");
 
 const getAllUsers = async (req, res) => {
   const allUsers = await db.query(
@@ -45,8 +49,17 @@ const loginUser = async (req, res) => {
 };
 
 const registerUser = async (req, res) => {
-  const { email, username, password } = req.body;
-  console.log(password)
+try {
+  const { email, username, password, confirmPassword } = req.body;
+console.log(email, username, password, confirmPassword )
+  if (password != confirmPassword) {
+    throw new Error("Your passwords do not match.")
+  }
+
+  if (!email || !username || !password || !confirmPassword) {
+    throw new Error("Please enter all fields");
+  }
+
 
   const foundUser = await db.query(
     "SELECT email FROM users WHERE email = $1 OR username = $2",
@@ -66,6 +79,11 @@ const registerUser = async (req, res) => {
   } else {
     res.json({ loggedIn: false, status: "Email or Username already in use" });
   }
+  
+} catch (error) {
+  console.log(error.message)
+  res.json({error: error.message});
+}
 };
 
 const deleteUser = async (req, res) => {
