@@ -1,7 +1,50 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import Auth from "../utils/auth";
 
 const Login = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState("");
+
+  const loginUser = async (email, password) => {
+    fetch("http://localhost:5000/api/user/login", {
+      mode: "cors",
+      method: "POST",
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          setErrors(data.error);
+        } else {
+          Auth.login(data.token);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const onChange = (event) => {
+    setFormData({ ...formData, [event.target.name]: event.target.value });
+    console.log(formData);
+  };
+
+  const onSubmit = (event) => {
+    event.preventDefault();
+    loginUser(formData.email, formData.password);
+  };
+
   return (
     <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -21,7 +64,7 @@ const Login = () => {
             </Link>
           </p>
         </div>
-        <form className="mt-8 space-y-6" action="#" method="POST">
+        <form className="mt-8 space-y-6" onSubmit={onSubmit}>
           <input type="hidden" name="remember" defaultValue="true" />
           <div className="rounded-md shadow-sm -space-y-px">
             <div className="mb-4">
@@ -29,6 +72,7 @@ const Login = () => {
                 Email address
               </label>
               <input
+                onChange={onChange}
                 id="email-address"
                 name="email"
                 type="email"
@@ -43,6 +87,7 @@ const Login = () => {
                 Password
               </label>
               <input
+                onChange={onChange}
                 id="password"
                 name="password"
                 type="password"
@@ -74,6 +119,7 @@ const Login = () => {
           </div>
         </form>
       </div>
+      {errors !== "" ? <p className="text-center">{errors}</p> : false}
     </div>
   );
 };
